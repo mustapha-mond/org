@@ -252,7 +252,7 @@ contract org {
     function getOwnerNode (address _partner) external view returns (address){
         return (links[msg.sender][_partner].ownerNode);
     }
-//Migrate up to get approval node       
+       
     function getLevel(address _partner) internal view returns (uint) {
         uint level;
         address levelUp = links[msg.sender][_partner].ownerNode;
@@ -262,7 +262,8 @@ contract org {
             level++;
         }
     }
-   
+    
+//Migrate up to get approval node      
     function getAppovalLevel (address _user, address _partner, uint _amount, uint _txn) external returns (address) {
         require (_isUser(_user),'Error: User not registered');
         require (_isRegistered(_partner, _user),'Error: Partner not registered for this user');
