@@ -1,0 +1,102 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="bundle.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <h1>Organization Setup</h1>
+
+          <form id="regUser">
+            <h2>Register User</h2>
+            <div class="form-group">
+              <label for="reg-user">User</label>
+              <input id="reg-user" type="text" class="form-control"></input>
+              <label for="reg-name">Name</label>
+              <input id="reg-name" type="text" class="form-control"></input>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <p id="regUser-result"></p>
+          </form>
+
+          <hr>
+
+          <form id="regPartner">
+            <h2>Register Partner</h2>
+            <div class="form-group">
+              <label for="reg-partner">Partner</label>
+              <input id="reg-partner" type="text" class="form-control"></input>
+              <label for="reg-name">Name</label>
+              <input id="reg-name" type="text" class="form-control"></input>
+              <label for="reg-partner">Limit</label>
+              <input id="reg-partner" type="number" class="form-control"></input>
+              <label for="reg-name">Can Register</label>
+              <input id="reg-name" type="text" class="form-control"></input>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <p id="regPartner-result"></p>
+          </form>
+
+          <hr>
+
+          <form id="changePartner">
+            <h2>Change Partner</h2>
+            <div class="form-group">
+              <label for="change-partner">Partner</label>
+              <input id="change-partner" type="text" class="form-control"></input>
+              <label for="change-name">Name</label>
+              <input id="change-name" type="text" class="form-control"></input>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <p id="changePartner-result"></p>
+          </form>
+
+          <hr>
+
+          <form id="getPartner">
+            <h2>Get Partner</h2>
+            <div class="form-group">
+              <label for="get-partner">Partner</label>
+              <input id="get-partner" type="text" class="form-control"></input>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <p id="getPartner-result"></p>
+          </form>
+
+          <hr>
+
+          <form id="regExtPartner">
+            <h2>Register External Partner</h2>
+            <div class="form-group">
+              <label for="ext-user">User</label>
+              <input id="ext-user" type="text" class="form-control"></input>
+              <label for="ext-partner">External Partner</label>
+              <input id="ext-partner" type="text" class="form-control"></input>
+              <label for="ext-partner">Name</label>
+              <input id="ext-partner" type="text" class="form-control"></input>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <p id="regExtPartner-result"></p>
+          </form>
+
+          <form id="linkPartner">
+            <h2>Link Partner</h2>
+            <div class="form-group">
+              <label for="linkto-partner">Partner</label>
+              <input id="linkto-partner" type="text" class="form-control"></input>
+              <label for="link-partner">Partner to Link</label>
+              <input id="link-partner" type="text" class="form-control"></input>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <p id="linkPartner-result"></p>
+          </form>
+
+
+          <hr>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
