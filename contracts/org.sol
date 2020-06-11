@@ -252,7 +252,7 @@ contract org {
     function getOwnerNode (address _partner) external view returns (address){
         return (links[msg.sender][_partner].ownerNode);
     }
-   
+//Migrate up to get approval node       
     function getLevel(address _partner) internal view returns (uint) {
         uint level;
         address levelUp = links[msg.sender][_partner].ownerNode;
