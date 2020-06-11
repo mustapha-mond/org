@@ -139,7 +139,7 @@ contract po {
         headers[_user][msg.sender][_extPartner][_poNumber].approver = org.getAppovalLevel(_user, msg.sender, headers[_user][msg.sender][_extPartner][_poNumber].total, _poNumber);
     }
    
-//  Pending EIR 170 resolution
+//  Pending EIP 170 resolution
 //  function setApproval (address _user, address _extPartner, uint _poNumber) external  {
 //       intOrg org = intOrg(addressOrg);
 //        require (org._isUser(_user),'Error: User not registered');
