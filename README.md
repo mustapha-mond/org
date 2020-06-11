@@ -9,6 +9,8 @@ The goal of this project is to enable a user to configure an organization struct
    Dynamic linking
  
    Matrix organizations
+   
+   Transaction integration
  
  The use case provides for a Purchase Order approval scenario whereby a PO is submitted for approval and migrates up the organization hierarchy until the appropriate approval level is reached. The node determined by this process becomes the approver of the PO.
 
