@@ -11,7 +11,7 @@ interface intOrg{
 
 contract org {
    
-    address owner; //Owner = me
+    address owner; 
    
     enum PTYPE {I,E,U} //Internal, External, User Partner
 
