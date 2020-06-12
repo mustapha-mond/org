@@ -16,9 +16,7 @@ The goal of this project is to enable a user to configure an organization struct
 
 The eventual goal is to be able to add plug-ins for any type of business process that would refer to the org structure.
 
-Detailed spec is here:
+Detailed spec is [here](https://docs.google.com/document/d/1jQOW8ZO2-IxkCLyEBoNOcMOGYlQAnNhQ0TgIiQnncik/edit#heading=h.9nvcibv3gama)
 
-
-https://docs.google.com/document/d/1jQOW8ZO2-IxkCLyEBoNOcMOGYlQAnNhQ0TgIiQnncik/edit#heading=h.9nvcibv3gama
 
 
