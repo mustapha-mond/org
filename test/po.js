@@ -74,13 +74,57 @@ contract("ORG", (accounts) => {
       assert(false);
     });
 
-    //assert returns <false> in the debugger but not in regular run
-    // it("Delete PO item", async () => {
-    //    await po.deleteItem(accounts[5], accounts[7], 1, 1, {
-    //      from: accounts[6],        
-    //    });
-    //    assert(!po.isItem(accounts[5], accounts[7], 1, 1, { from: accounts[6]}));
-    // });
-    
+    it("Can't delete Order if items exist", async () => {
+      try {
+        await po.deleteOrder(accounts[5], accounts[7], 1, {
+          from: accounts[6],
+        });
+      } catch (e) {
+        assert(e.message.includes("Error: Items exist"));
+        return;
+      }
+      assert(false);
+    });
+
+    it("Delete PO item", async () => {
+      await po.deleteItem(accounts[5], accounts[7], 1, 1, {
+        from: accounts[6],
+      });
+      const r = await !po.isItem(accounts[5], accounts[7], 1, 1, { from: accounts[6] });
+      assert (!r);
+    });
+
+    it("Can't delete non existant item", async () => {
+      try {
+        await po.deleteItem(accounts[5], accounts[7], 1, 1, {
+          from: accounts[6],
+        });
+      } catch (e) {
+        assert(e.message.includes("Error: Item does not exist"));
+        return;
+      }
+      assert(false);
+    });
+
+    it("Delete Order", async () => {
+      await po.deleteOrder(accounts[5], accounts[7], 1, {
+        from: accounts[6],
+      });
+      const r = await !po.isOrder(accounts[5], accounts[7], 1, { from: accounts[6] });
+      assert (!r);
+    });
+
+    it("Can't delete non existant order", async () => {
+      try {
+        await po.deleteOrder(accounts[5], accounts[7], 1, {
+          from: accounts[6],
+        });
+      } catch (e) {
+        assert(e.message.includes("Error: Order does not exist"));
+        return;
+      }
+      assert(false);
+    });
+
   });
 });
