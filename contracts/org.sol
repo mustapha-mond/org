@@ -192,7 +192,7 @@ contract org {
        
         if (!_isExtReg (_user, _extPartner)){
             partners[_user][_extPartner].name = 'External';
-            if (_isUser(_user)) {
+            if (_isUser(_extPartner)) {
                partners[_user][_extPartner].ptype = PTYPE(2);
             } else {
                 partners[_user][_extPartner].ptype = PTYPE(1);
