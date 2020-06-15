@@ -59,15 +59,13 @@ Dotted Linking is a secondary link that occurs when an already linked Partner is
 Dynamic linking is supported whereby a Partner may be de-linked from a Partner node  and subsequently linked to any other node in the User account. All lower level Partners of the de-linked Partner will be re-assigned dynamically. In addition, all Dotted links are removed.
 
 
-### [Figure 1].(https://docs.google.com/presentation/d/191So-79mYQ3KWtugFQhw3SMxwzN-Bz7yeMEsVb46pIY/edit#slide=id.p)
+### [Figure 1](https://docs.google.com/presentation/d/191So-79mYQ3KWtugFQhw3SMxwzN-Bz7yeMEsVb46pIY/edit#slide=id.p)
 
 This slide shows the relationships supported by this model. 
 
 All nodes in this model are represented by Ethereum addresses. 
 
-### Figure 2
-
-![](2020-06-15-10-10-48.png)
+### [Figure 2](https://docs.google.com/presentation/d/191So-79mYQ3KWtugFQhw3SMxwzN-Bz7yeMEsVb46pIY/edit#slide=id.g808a13faed_5_0)
 
 It is possible that a Partner address could also be a User   address. In this way a hierarchy of Users could be built   similar to a company with subsidiaries.   
 A subcontractor/ distributor scenario would also be possible.  
