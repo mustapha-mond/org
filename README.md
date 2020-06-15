@@ -61,7 +61,7 @@ Dynamic linking is supported whereby a Partner may be de-linked from a Partner n
 
 ### Figure 1
 
-![](2020-06-15-10-04-53.png)
+![Figure1](2020-06-15-10-04-53.png)
 
 This slide shows the relationships supported by this model. 
 
