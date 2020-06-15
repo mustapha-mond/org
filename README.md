@@ -4,7 +4,7 @@
 
 ## _Overview_
 
->The objective of this project is to provide a framework for   building organizational structures on Ethereum blockchain. These org structures could be used to represent any kind of social hierarchy, for example a company, hierarchy of companies or a hierarchical voting model like the court system. < 
+The objective of this project is to provide a framework for   building organizational structures on Ethereum blockchain. These org structures could be used to represent any kind of social hierarchy, for example a company, hierarchy of companies or a hierarchical voting model like the court system. 
 
 ## _Goals_
 
