@@ -4,7 +4,7 @@
 
 ## _Overview_
 
-The objective of this project is to provide a framework for   building organizational structures on Ethereum blockchain. These org structures could be used to represent any kind of social hierarchy, for example a company, hierarchy of companies or a hierarchical voting model like the court system. Each node in the hierarchy is an Ethereum address, this enables transfer of funds within and between entities, for example a company would simply transfer Ether to another company's A/P account with no need of intermediaries.
+The objective of this project is to provide a framework for   building organizational structures on Ethereum blockchain. These org structures could be used to represent any kind of social hierarchy, for example a company, hierarchy of companies or a hierarchical voting model such as the court system. Each node in the hierarchy is an Ethereum address, this enables transfer of funds or tokens within and between entities, for example a company would simply transfer Ether to another company's A/P account with no need of intermediaries.
 
 ## _Goals_
 
@@ -40,7 +40,7 @@ There are four roles in this model:
 * **Partner**  
 * **External Partner**
 
-**Owner:** The Owner role sits at the top of the hierarchy. The concept is for an ecosystem of Users that can freely interact. The Owner registers Users and has no other function.
+**Owner:** The Owner role sits at the top of the hierarchy. The concept is for an ecosystem of Users that can freely interact. The Owner registers Users and is responsible for the maintenenace of the ecosystem. This entails vetting and managing the deployment of plug-ins and holding deposits for transactions to incent users to delete expired transactions and so manage the storage footprint to keep gas costs in check. 
 
 **User:** A User is analogous to an administrator for an organization. It could also be a legal entity such as a company. A User can maintain and link Partners within a User account. User is unique within Owner.
 
