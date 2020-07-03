@@ -8,10 +8,10 @@ The objective of this project is to provide a framework for   building organizat
 
 ## _Goals_
 
-1. Provide a utility to construct an org structure of any depth and complexity.
+1. Provide a utility to construct and maintain an org structure of any depth and complexity.
 2. Provide a secure, robust, scalable and easy to use solution.
 3. Facilitate financial/logistical transactions across and within organizations.
-4. Link any kind of process or transaction to an org structure. A Purchase Order approval mechanism is the scenario explored here.
+4. Provide plug-in capabaility so that any kind of process or transaction can reference an org structure. A Purchase Order approval mechanism is the scenario explored here.
 
 The code currently supports:
 
