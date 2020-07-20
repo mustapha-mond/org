@@ -100,7 +100,7 @@ org.sol supports the creation of User, Partner, Extended Partner relationships t
 
 ## _po.sol_
 
-.The po.sol contract is intended as a demonstration use case for org.sol. It implements full CRUD capability with referential integrity. po.sol is a minimal implementation of a purchase order, the reason for keeping it on-chain is so that both parties have visibility to a ‘single source of truth’. A future development option is to charge a deposit held by the owner node that is returned to the User account that created the PO once the PO is deleted. This is an incentive to reduce the storage footprint of the po.sol contract.
+The po.sol contract is intended as a demonstration use case for org.sol. It implements full CRUD capability with referential integrity. po.sol is a minimal implementation of a purchase order, the reason for keeping it on-chain is so that both parties have visibility to a ‘single source of truth’. A future development option is to charge a deposit held by the owner node that is returned to the User account that created the PO once the PO is deleted. This is an incentive to reduce the storage footprint of the po.sol contract.
 po.sol implements the hierarchy structure of org.sol through an interface that calls requirement functions in the org.sol contract.
 po.sol calls org,sol to get the required level of approval based on PO value.
 
