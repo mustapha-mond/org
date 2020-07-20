@@ -238,6 +238,7 @@ contract org {
             partners[msg.sender][_partner].partnerPointers[_linkPartner] =
             partners[msg.sender][_partner].partnerIdx.push(_linkPartner) - 1;
             links[msg.sender][_linkPartner].ownerNode = _partner;
+            return true;
         } else {
             require (!_isDottedLinked(_partner, _linkPartner),'Error: Dotted link already exists');
             if (linkPartLevel > partnerLevel) {
@@ -245,8 +246,24 @@ contract org {
                 partners[msg.sender][_linkPartner].dottedIdxUp.push(_partner) - 1;
                 partners[msg.sender][_partner].dottedPointersDown[_linkPartner] =
                 partners[msg.sender][_partner].dottedIdxDown.push(_linkPartner) - 1;
+                return true;
             } else revert ('Error: Invlalid hierarchy');
         }
+    }
+   
+   function delinkPartner (address _partner, address _linkPartner) external returns (bool) {
+        require (_isUser(msg.sender),'Error: User not registered');
+        require (_isRegistered(_partner, msg.sender),'Error: Partner not registered for this user');
+        require (_isRegistered(_linkPartner, msg.sender),'Error: Link Partner not registered for this user');
+        require (_isLinked(_partner, _linkPartner),'Error: Partner not linked');
+        partners[msg.sender][_partner].linked = false;
+        uint rowToDelete = partners[msg.sender][_partner].partnerPointers[_linkPartner];
+        address keyToMove = partners[msg.sender][_partner].partnerIdx[partners[msg.sender][_partner].partnerIdx.length -1];
+        partners[msg.sender][_partner].partnerIdx[rowToDelete] = keyToMove;
+        delete partners[msg.sender][_partner].partnerPointers[_linkPartner];
+        partners[msg.sender][_partner].partnerIdx.pop();
+        delete links[msg.sender][_linkPartner];
+        return true;
     }
    
     function getOwnerNode (address _partner) external view returns (address){
