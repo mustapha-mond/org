@@ -42,6 +42,8 @@ There are four roles in this model:
 
 **Owner:** The Owner role sits at the top of the hierarchy. The concept is for an ecosystem of Users that can freely interact. The Owner registers Users and is responsible for the maintenenace of the ecosystem. This entails vetting and managing the deployment of plug-ins and holding deposits for transactions to incent users to delete expired transactions and so manage the storage footprint to keep gas costs in check. 
 
+In fact there cold be multiple Owner instances and because accounts are unique it would be possible for Users/Parners to interact across Owner instances. Owners could therefore compete on such factors as rates, usability or plug-in support.
+
 **User:** A User is analogous to an administrator for an organization. It could also be a legal entity such as a company. A User can maintain and link Partners within a User account. User is unique within Owner.
 
 **Partner:** A Partner is a node within a User account, e.g. an individual or department within a company. A Partner can create External Partners in order to interact with other Users or entities external to the Owner ecosystem. Partner is unique within User.
