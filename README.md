@@ -44,7 +44,11 @@ There are four roles in this model:
 
 In fact there cold be multiple Owner instances and because accounts are unique it would be possible for Users/Parners to interact across Owner instances. Owners could therefore compete on such factors as rates, usability or plug-in support.
 
+Funds deposited by Users are held in the Smart Contract deployed by the Owner. The Owner does not have any access to these funds. In this sense the Smart Contract acts as a kind of bank. It would be possible to set liquidity ratios and offer loans to Users or even other Owner.
+
 **User:** A User is analogous to an administrator for an organization. It could also be a legal entity such as a company. A User can maintain and link Partners within a User account. User is unique within Owner.
+
+Users deposit funds to the Smart Contract which they then use to trade with other Users either withing or outside their own Owner ecosystem. 
 
 **Partner:** A Partner is a node within a User account, e.g. an individual or department within a company. A Partner can create External Partners in order to interact with other Users or entities external to the Owner ecosystem. Partner is unique within User.
 A Partner may have assigned rights, for example the ability to approve a Purchase Order or to vote in a poll. 
