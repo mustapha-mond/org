@@ -1,12 +1,17 @@
-# Build an Organization on Ethereum blockchain
+# A full lifecycle supply chain/accounting application built on Ethereum blockchain
 
 05.27.2020
 
 ## _Overview_
 
-The objective of this project is to provide a framework for building organizational structures on Ethereum blockchain. These org structures could be used to represent any kind of social hierarchy, for example a company, hierarchy of companies or a hierarchical voting model such as the court system. Each node in the hierarchy is an Ethereum address, this enables transfer of funds or tokens within and between entities, for example a company would simply transfer Ether/DAI to another company's A/R account with no need of intermediaries. It eliminates duplication from economic activity.
+- Eliminates Duplication from the Economy
+- Enables Traceability throughout the Supply Chain
+- Provides a mechanism for Single Sign-On 
+- Provides a Global Logistics Platform 
+- Provides a Global Payments Platform
+- Is DAO of DAOs that provides for Operational and Technical Governance
 
-## _Update_
+## _Docs_
 
 Overview:
 
@@ -87,30 +92,6 @@ Dotted Linking is a secondary link that occurs when an already linked Partner is
 Dynamic linking is supported whereby a Partner may be de-linked from a Partner node  and subsequently linked to any other node in the User account. All lower level Partners of the de-linked Partner will be re-assigned dynamically. In addition, all Dotted links are removed.
 
 
-### [Figure 1](https://docs.google.com/presentation/d/191So-79mYQ3KWtugFQhw3SMxwzN-Bz7yeMEsVb46pIY/edit#slide=id.p)
-
-This slide shows the relationships supported by this model. 
-
-All nodes in this model are represented by Ethereum addresses. 
-
-### [Figure 2](https://docs.google.com/presentation/d/191So-79mYQ3KWtugFQhw3SMxwzN-Bz7yeMEsVb46pIY/edit#slide=id.g808a13faed_5_0)
-
-It is possible that a Partner address could also be a User   address. In this way a hierarchy of Users could be built   similar to a company with subsidiaries.   
-A subcontractor/ distributor scenario would also be possible.  
-
-## _Specifications - Technical_
-
-This model (org.sol, po.sol)  are Smart Contracts implemented using the Solidity language. 
-
-### _Referential Integrity_
-
-This model provides full for referential integrity for CRUD operations. Solidity does not provide a database so referential integrity must be enforced using a combination of arrays and key/value objects called mappings. The foundation for this approach is an article by Rob Hitchens in [Medium](https://medium.com/robhitchens/enforcing-referential-integrity-in-ethereum-smart-contracts-a9ab1427ff42
-)
-
-### _Dynamic Linking and Hierarchical Integrity_
-
-The model calculates the level of each node during the linking process. For example, in slide 1 above it would not be possible to link User: U1/Partner 1 to any lower level Partner.
-
 Partners can be de-linked and re-linked  to any other node in the User hierarchy. This will cause all lower level Partners to automatically re-assigned and Dotted links to be removed.
 
 ## _Access Controls_
@@ -143,32 +124,7 @@ Once a Purchase Orders has been entered by a Partner with reference to an Extern
 The approved address is stamped on the PO header and added to a list of pending approvals for the approving partner. In this way a simple workflow is enabled. If the PO amount is greater than the approval limit of any higher level partner then the PO is sent to the User node.
 Once the PO is approved it becomes visible to the counterparty. 
 
-## _Future Development_ 
 
-1. Complete all Truffle test scenarios for po.sol and org.sol.
-2. Complete Approve process for PO.
-3. Add balance sheet and P/L capability to User node and potentially Partner nodes.
-4. Enable cost allocation across Partner nodes.
-5. Allow User node to post to another User node e.g. A/P, A/R.
-6. Build generalized interface to org.sol so that any transaction can be easily implemented, e.g. broadcast tender to multiple External Partners with a time limit and select best price. Use Plug-in approach. 
-7. Charge deposit to Users whose Partners post transactions. The deposit is returned once the transaction is deleted. This is an incentive to keep the transaction contracts from growing indefinitely.
-8. Add de-linking functionality.
-9. Add delete functions to unwind all org.sol relationships with checks on referential integrity and business logic.
-Allow User node to ‘see’ all transactions with other User nodes.
-10. Add Events to interact with Web3 server.
-11. Add reporting capability based on Events.
-12. Incorporate React and Drizzle.
-13. Build a user friendly front end. Current front end is basic Bootstrap.
-14. Add recursive depth search to return all nodes below a given level.
-15. Add permissions profile to Partners, e.g. what transactions can be executed.
-16. Encrypt transactions or use aliases to prevent adversaries from deducing patterns on Etherscan.
-17. Allow User node to delegate to Partners with time limit.
-18. Implement either ERC1538: Transparent Contract Standard · Issue #1538 · ethereum/EIPs or Diamond patterns to circumvent ERC 170 issues.
-19. Implement Approval Strategy so that approvals can be lateral as well as hierarchical.
-20. Frontend should call all requirements first before calling a function to avoid unnecessary gas charges. Need to put all of Link function checks in separate function.
-21. Add ability to Web3 server to upload POs from spreadsheets.
-22. Build a reputation system, e.g. based on payment history.
-23. What would ownerless model look like?
 
 
 
