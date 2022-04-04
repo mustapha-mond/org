@@ -4,7 +4,7 @@
 
 ## _Overview_
 
-- Eliminates Duplication from the Economy
+- Eliminates Duplication from economic activity
 - Enables Traceability throughout the Supply Chain
 - Provides a mechanism for Single Sign-On 
 - Provides a Global Logistics Platform 
