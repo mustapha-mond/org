@@ -4,7 +4,28 @@
 
 ## _Overview_
 
-The objective of this project is to provide a framework for   building organizational structures on Ethereum blockchain. These org structures could be used to represent any kind of social hierarchy, for example a company, hierarchy of companies or a hierarchical voting model such as the court system. Each node in the hierarchy is an Ethereum address, this enables transfer of funds or tokens within and between entities, for example a company would simply transfer Ether to another company's A/R account with no need of intermediaries.
+The objective of this project is to provide a framework for building organizational structures on Ethereum blockchain. These org structures could be used to represent any kind of social hierarchy, for example a company, hierarchy of companies or a hierarchical voting model such as the court system. Each node in the hierarchy is an Ethereum address, this enables transfer of funds or tokens within and between entities, for example a company would simply transfer Ether/DAI to another company's A/R account with no need of intermediaries. It eliminates duplication from economic activity.
+
+## _Update_
+
+Overview:
+
+https://docs.google.com/presentation/d/1nzTLvVUPsVcIxiqXMcJCXswuxxtxfN_-NpqvYMmYQk0/edit?usp=sharing
+
+Litepaper:
+
+https://docs.google.com/document/d/1tEY9Do_NjU-5O04cAeI3VIbLQar3l596G07GFfD26rI/edit?usp=sharing
+
+B2C Demo:
+
+https://drive.google.com/file/d/1YRYyWbSm6w6_ryocfS37XBS32M--9BDY/view?usp=sharing
+
+Note: e-commerce website cloned from Scrimba React course with some mods. 
+
+B2B Demo:
+
+https://drive.google.com/file/d/1lIEju9dEEkXIv6iJL1ubFjNov2BE5oxN/view?usp=sharing
+
 
 ## _Goals_
 
@@ -28,6 +49,7 @@ The code currently supports:
  * Transaction integration
  
  The use case provides for a Purchase Order approval scenario whereby a PO is submitted for approval and migrates up the organization hierarchy until the appropriate approval level is reached. The node determined by this process becomes the approver of the PO.
+
 
 ## _Specifications - Functional_
 
