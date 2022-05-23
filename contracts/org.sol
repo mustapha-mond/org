@@ -1,7 +1,10 @@
-pragma solidity ^0.5.16;
+pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
+ 
+import '../client/node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol';  
 
 interface intOrg {
+
     function _isUser(address _user) external view returns (bool);
 
     function _isPartExtReg(address _user, address _msgSender) external view returns (bool);
@@ -18,11 +21,16 @@ interface intOrg {
 }
 
 contract org {
+
+    IERC20 dai;
+
     address owner; //Owner = me
 
     enum PTYPE {U, I, E, P} //Internal, External, User Partner
     enum STAGE {IN, TA, TS, TR, TP, PD} // Initial, To Approve, To Ship, To Receive, To Pay
     enum STATUS {IN, AP, RJ} // Approved, Rejected
+
+    event status(address indexed _user, address indexed _partner, address indexed _ext_partner, uint txn, uint _value, STAGE _stage);
   
     struct Transaction{
         address approver;
@@ -140,9 +148,36 @@ contract org {
 
     //Declare Events here
 
-    constructor() public {
+    constructor(address daiAddress) public {
+        dai = IERC20(daiAddress);
         owner = msg.sender;
     }
+
+    // function _transfer(address recipient, uint amount) external {
+    //     dai.transfer(recipient, amount);
+    // }    
+
+    // function _transferFrom(address recipient, uint amount) external {
+    //     require(_isUser(msg.sender), "Error: User not registered");
+    //     users[msg.sender].bal += amount;
+    //     dai.transferFrom(msg.sender, address(this), amount);
+    // }          
+
+    // function _approve(address spender, uint amount) external {
+    //     dai.approve(spender,1000000000000000000);
+    // }
+
+    // function _allowance(address msg_sender, address spender) external view returns (uint){
+    //     return dai.allowance(msg_sender, spender);
+    // }                
+
+    // function getChainID() external view returns (uint256) {
+    // uint256 id;
+    // assembly {
+    //     id := chainid()
+    // }
+    // return id;
+    // }       
 
     function _isUser(address _user) public view returns (bool) {
         if (userIdx.length == 0) return false;
@@ -152,7 +187,8 @@ contract org {
     function regUser(address _user, string calldata _name) external onlyOwner isNotUser(_user)returns (bool) {
         users[_user].name = _name;
         users[_user].regCount += 1;
-        users[_user].index = userIdx.push(_user) - 1;
+        userIdx.push(_user);
+        users[_user].index = userIdx.length - 1;
         return true;
     }
 
@@ -212,10 +248,11 @@ contract org {
         partners[msg.sender][_partner].ptype = PTYPE(3);
         partners[msg.sender][_partner].regCount += 1;
         if (_defShip) {users[msg.sender].defShip = _partner;}
-        uint256 idx = users[msg.sender].partnerIdx.push(_partner) - 1;
-        users[msg.sender].partnerPointers[_partner] = idx;
-        partners[msg.sender][_partner].index = idx;
-        contractPartners[_partner].users.push(msg.sender);
+            users[msg.sender].partnerIdx.push(_partner);
+            uint256 idx = users[msg.sender].partnerIdx.length - 1;
+            users[msg.sender].partnerPointers[_partner] = idx;
+            partners[msg.sender][_partner].index = idx;
+            contractPartners[_partner].users.push(msg.sender);
         return true;
     }
 
@@ -293,7 +330,8 @@ contract org {
 
         extPartners[_user][msg.sender][_extPartner].name = _name;
         extPartners[_user][msg.sender][_extPartner].payee = _payee;
-        uint256 iEdx = partners[_user][msg.sender].extPartnerIdx.push(_extPartner) - 1;
+        partners[_user][msg.sender].extPartnerIdx.push(_extPartner);
+        uint256 iEdx = partners[_user][msg.sender].extPartnerIdx.length - 1;
         partners[_user][msg.sender].extPartnerPointers[_extPartner] = iEdx;
         extPartners[_user][msg.sender][_extPartner].index = iEdx;
 
@@ -304,12 +342,13 @@ contract org {
             } else {
                 partners[_user][_extPartner].ptype = PTYPE(1);
             }
-            uint256 idx = users[_user].partnerIdx.push(_extPartner) - 1;
+            users[_user].partnerIdx.push(_extPartner);
+            uint256 idx = users[_user].partnerIdx.length - 1;
             users[_user].partnerPointers[_extPartner] = idx;
             partners[_user][_extPartner].index = idx;
         }
-
-        uint256 iIdx = partners[_user][_extPartner].intPartnerIdx.push(msg.sender) - 1;
+        partners[_user][_extPartner].intPartnerIdx.push(msg.sender);
+        uint256 iIdx = partners[_user][_extPartner].intPartnerIdx.length - 1;
         partners[_user][_extPartner].intPartnerPointers[msg.sender] = iIdx;
 
         return true;
@@ -347,13 +386,16 @@ contract org {
         if (linkPartLevel == 0 && !partners[msg.sender][_linkPartner].linked) {
             require(partners[msg.sender][_partner].limit > partners[msg.sender][_linkPartner].limit,"Error: Link partner has a higher limit");
             partners[msg.sender][_partner].linked = true;
-            partners[msg.sender][_partner].partnerPointers[_linkPartner] = partners[msg.sender][_partner].partnerIdx.push(_linkPartner) - 1;
+            partners[msg.sender][_partner].partnerIdx.push(_linkPartner);
+            partners[msg.sender][_partner].partnerPointers[_linkPartner] = partners[msg.sender][_partner].partnerIdx.length - 1;
             links[msg.sender][_linkPartner].ownerNode = _partner;
         } else {
             require(!_isDottedLinked(_partner, _linkPartner), "Error: Dotted link already exists");
             if (linkPartLevel > partnerLevel) {
-                partners[msg.sender][_linkPartner].dottedPointersUp[_partner] = partners[msg.sender][_linkPartner].dottedIdxUp.push(_partner) - 1;
-                partners[msg.sender][_partner].dottedPointersDown[_linkPartner] = partners[msg.sender][_partner].dottedIdxDown.push(_linkPartner) - 1;
+                partners[msg.sender][_linkPartner].dottedIdxUp.push(_partner);
+                partners[msg.sender][_linkPartner].dottedPointersUp[_partner] = partners[msg.sender][_linkPartner].dottedIdxUp.length - 1;
+                partners[msg.sender][_partner].dottedIdxDown.push(_linkPartner);
+                partners[msg.sender][_partner].dottedPointersDown[_linkPartner] = partners[msg.sender][_partner].dottedIdxDown.length - 1;
             } else revert("Error: Invlalid hierarchy");
         }
     }
@@ -399,6 +441,7 @@ contract org {
         require(_isUser(_user), "Error: User not registered");
         require(_isRegistered(_partner, _user), "Error: Partner not registered for this user");
    //     require(_isTxn(_user, _partner, _extPartner, _txn), "Error: Transaction does not exist");
+        require(txns[_user][_partner][_extPartner][_txn].stage == STAGE(0), "Error: Not ready to approve 0");
         if (!_approve) {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(2);
             return _partner; 
@@ -434,6 +477,7 @@ contract org {
         require(_isUser(_user), "Error: User not registered");
         require(_isRegistered(msg.sender, _user), "Error: Partner not registered for this user");
         // require(_isTxn(_user, _partner, _extPartner, _txn), "Error: Transaction does not exist");
+        require(txns[_user][_partner][_extPartner][_txn].stage == STAGE(1), "Error: Not ready to approve 1");
         if (_approve) {
              if (_isUser(_extPartner) && users[_extPartner].defShip != address(0)) {
                  uint idx = txns[_user][_partner][_extPartner][_txn].index;
@@ -445,8 +489,10 @@ contract org {
             txns[_user][_partner][_extPartner][_txn].stage = STAGE(2);
         }
         else {
-            txns[_user][_partner][_extPartner][_txn].status = STATUS(2);
+            txns[_user][_partner][_extPartner][_txn].status = STATUS(0);
+            txns[_user][_partner][_extPartner][_txn].stage = STAGE(0);
         }
+        emit status(_user, _partner, _extPartner, _txn, txns[_user][_partner][_extPartner][_txn].amount, txns[_user][_partner][_extPartner][_txn].stage );
         return true;
     }
             
@@ -454,6 +500,7 @@ contract org {
         require(_isUser(_extPartner), "Error: User not registered");
         require(_isRegistered(msg.sender, _extPartner), "Error: Partner not registered for this user");
         // require(_isTxn(_user, _partner, _extPartner, _txn), "Error: Transaction does not exist");
+        require(txns[_user][_partner][_extPartner][_txn].stage == STAGE(2),"Error: Not ready to ship");
         if (_ship) {
              // Delete from Shipper here
             txns[_user][_partner][_extPartner][_txn].status = STATUS(1);
@@ -462,6 +509,7 @@ contract org {
         else {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(2);
         }
+        emit status(_user, _partner, _extPartner, _txn, txns[_user][_partner][_extPartner][_txn].amount, txns[_user][_partner][_extPartner][_txn].stage );
         return true;
     }
 
@@ -469,6 +517,7 @@ contract org {
         require(_isUser(_user), "Error: User not registered");
         require(_isRegistered(msg.sender, _user), "Error: Partner not registered for this user");
         // require(_isTxn(_user, _partner, _extPartner, _txn), "Error: Transaction does not exist");
+        require(txns[_user][_partner][_extPartner][_txn].stage == STAGE(3),"Error: Not ready to receive");
         if (_receive) {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(1);
             txns[_user][_partner][_extPartner][_txn].stage = STAGE(4);
@@ -476,15 +525,17 @@ contract org {
         else {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(2);
         }
+        emit status(_user, _partner, _extPartner, _txn, txns[_user][_partner][_extPartner][_txn].amount, txns[_user][_partner][_extPartner][_txn].stage );
         return true;
     }
     
     function pay(address _user, address _partner, address payable _extPartner, uint256 _txn, bool _pay) external returns (bool) {
         require(_isUser(_user), "Error: User not registered");
         require(_isRegistered(msg.sender, _user), "Error: Partner not registered for this user");
+        require(txns[_user][_partner][_extPartner][_txn].stage == STAGE(4),"Error: Not ready to pay");
         require(users[_user].bal >= txns[_user][_partner][_extPartner][_txn].amount, "Error: Insufficient funds");
-        users[_user].bal -= txns[_user][_partner][_extPartner][_txn].amount;
         if (_pay) {
+            users[_user].bal -= txns[_user][_partner][_extPartner][_txn].amount;
             if (_isUser(_extPartner)) {
                 users[_extPartner].bal += txns[_user][_partner][_extPartner][_txn].amount;
             } else _extPartner.transfer(txns[_user][_partner][_extPartner][_txn].amount);
@@ -494,6 +545,7 @@ contract org {
         else {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(2);
         }
+        emit status(_user, _partner, _extPartner, _txn, txns[_user][_partner][_extPartner][_txn].amount, txns[_user][_partner][_extPartner][_txn].stage );
         return true;
     }
 
@@ -518,8 +570,8 @@ contract org {
             txns[_user][_partner][_extPartner][_txn].stage = STAGE(0);
             txns[_user][_partner][_extPartner][_txn].user = _user;
             txns[_user][_partner][_extPartner][_txn].extPartner = _extPartner;
-        
-            idx = txnIdx.push(txn) - 1;
+            txnIdx.push(txn);
+            idx = txnIdx.length - 1;
             
             txns[_user][_partner][_extPartner][_txn].index = idx;
             
@@ -529,7 +581,7 @@ contract org {
         }
             else {
                 if (_action == 1) { //Change Transaction
-                    idx = txns[_user][_partner][_extPartner][_txn].index;
+                    //idx = txns[_user][_partner][_extPartner][_txn].index;
                      txns[_user][_partner][_extPartner][_txn].amount = _amount;
                 }
                     else {
@@ -562,25 +614,27 @@ contract org {
                 txint.status = txns[txnIdx[_index].user][txnIdx[_index].partner][txnIdx[_index].extPartner][txnIdx[_index].txn].status;
         return(txint);
     }
-   
-    function deposit(uint256 amount) public payable {
-        require(_isUser(msg.sender), "Error: User not registered");
-        users[msg.sender].bal += amount;
-    }
-
-    function withdraw(address payable _user, uint256 _amount) external returns (bool) {
-        require(_isUser(msg.sender), "Error: User not registered");
-        require(users[_user].bal >= _amount, "Error: Insufficient funds");
-        users[_user].bal -= _amount;
-        _user.transfer(_amount);
-        return true;
-    }
 
     function balanceOf() public view onlyOwner returns (uint256) {
     //Needs tightening up
-        return address(this).balance;
+       // return address(this).balance;
+       return dai.balanceOf(address(this));
     }
 
-    
+    function _transfer(address recipient, uint amount) external {
+       // require(_isUser(msg.sender), "Error: User not registered");
+       // require(users[recipient].bal >= amount, "Error: Insufficient funds");
+        users[recipient].bal -= amount;
+        dai.transfer(recipient, amount);
+    }    
+
+    function _transferFrom(uint amount) external {
+        require(_isUser(msg.sender), "Error: User not registered");
+        users[msg.sender].bal += amount;
+        dai.transferFrom(msg.sender, address(this), amount);
+    }          
+
 }
 
+
+    
