@@ -153,24 +153,6 @@ contract org {
         owner = msg.sender;
     }
 
-    // function _transfer(address recipient, uint amount) external {
-    //     dai.transfer(recipient, amount);
-    // }    
-
-    // function _transferFrom(address recipient, uint amount) external {
-    //     require(_isUser(msg.sender), "Error: User not registered");
-    //     users[msg.sender].bal += amount;
-    //     dai.transferFrom(msg.sender, address(this), amount);
-    // }          
-
-    // function _approve(address spender, uint amount) external {
-    //     dai.approve(spender,1000000000000000000);
-    // }
-
-    // function _allowance(address msg_sender, address spender) external view returns (uint){
-    //     return dai.allowance(msg_sender, spender);
-    // }                
-
     // function getChainID() external view returns (uint256) {
     // uint256 id;
     // assembly {
