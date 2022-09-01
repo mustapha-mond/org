@@ -29,8 +29,6 @@ contract org {
     enum PTYPE {U, I, E, P} //Internal, External, User Partner
     enum STAGE {IN, TA, TS, TR, TP, PD} // Initial, To Approve, To Ship, To Receive, To Pay
     enum STATUS {IN, AP, RJ} // Approved, Rejected
-
-    event status(address indexed _user, address indexed _partner, address indexed _ext_partner, uint txn, uint _value, STAGE _stage);
   
     struct Transaction{
         address approver;
@@ -152,6 +150,24 @@ contract org {
         dai = IERC20(daiAddress);
         owner = msg.sender;
     }
+
+    // function _transfer(address recipient, uint amount) external {
+    //     dai.transfer(recipient, amount);
+    // }    
+
+    // function _transferFrom(address recipient, uint amount) external {
+    //     require(_isUser(msg.sender), "Error: User not registered");
+    //     users[msg.sender].bal += amount;
+    //     dai.transferFrom(msg.sender, address(this), amount);
+    // }          
+
+    // function _approve(address spender, uint amount) external {
+    //     dai.approve(spender,1000000000000000000);
+    // }
+
+    // function _allowance(address msg_sender, address spender) external view returns (uint){
+    //     return dai.allowance(msg_sender, spender);
+    // }                
 
     // function getChainID() external view returns (uint256) {
     // uint256 id;
@@ -474,7 +490,6 @@ contract org {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(0);
             txns[_user][_partner][_extPartner][_txn].stage = STAGE(0);
         }
-        emit status(_user, _partner, _extPartner, _txn, txns[_user][_partner][_extPartner][_txn].amount, txns[_user][_partner][_extPartner][_txn].stage );
         return true;
     }
             
@@ -491,7 +506,6 @@ contract org {
         else {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(2);
         }
-        emit status(_user, _partner, _extPartner, _txn, txns[_user][_partner][_extPartner][_txn].amount, txns[_user][_partner][_extPartner][_txn].stage );
         return true;
     }
 
@@ -507,7 +521,6 @@ contract org {
         else {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(2);
         }
-        emit status(_user, _partner, _extPartner, _txn, txns[_user][_partner][_extPartner][_txn].amount, txns[_user][_partner][_extPartner][_txn].stage );
         return true;
     }
     
@@ -527,7 +540,6 @@ contract org {
         else {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(2);
         }
-        emit status(_user, _partner, _extPartner, _txn, txns[_user][_partner][_extPartner][_txn].amount, txns[_user][_partner][_extPartner][_txn].stage );
         return true;
     }
 
@@ -596,6 +608,40 @@ contract org {
                 txint.status = txns[txnIdx[_index].user][txnIdx[_index].partner][txnIdx[_index].extPartner][txnIdx[_index].txn].status;
         return(txint);
     }
+   
+    // function deposit(uint256 amount) public payable {
+    //     require(_isUser(msg.sender), "Error: User not registered");
+    //     users[msg.sender].bal += amount;
+    // }
+
+    // function withdraw(address payable _user, uint256 _amount) external returns (bool) {
+    //     require(_isUser(msg.sender), "Error: User not registered");
+    //     require(users[_user].bal >= _amount, "Error: Insufficient funds");
+    //     users[_user].bal -= _amount;
+    //     _user.transfer(_amount);
+    //     return true;
+    // }
+
+    // function balanceOf() public view onlyOwner returns (uint256) {
+    // //Needs tightening up
+    //     return address(this).balance;
+    // }
+
+    //  function deposit(uint256 amount) external {
+    //     require(_isUser(msg.sender), "Error: User not registered");
+    //     users[msg.sender].bal += amount;
+    //     //dai.approve(msg.sender, 1000000000000000000);
+    //     dai.transfer(msg.sender, 1000000000000000000);
+    // }
+
+    // function withdraw(address payable _user, uint256 _amount) external returns (bool) {
+    //     require(_isUser(msg.sender), "Error: User not registered");
+    //  //   require(users[_user].bal >= _amount, "Error: Insufficient funds");
+    //     users[_user].bal -= _amount;
+    //    // _user.transfer(_amount);
+    //    dai.transfer(address(this),10000000000000000000);
+    //     return true;
+    // }
 
     function balanceOf() public view onlyOwner returns (uint256) {
     //Needs tightening up
@@ -603,11 +649,11 @@ contract org {
        return dai.balanceOf(address(this));
     }
 
-    function _transfer(address recipient, uint amount) external {
-       // require(_isUser(msg.sender), "Error: User not registered");
-       // require(users[recipient].bal >= amount, "Error: Insufficient funds");
-        users[recipient].bal -= amount;
-        dai.transfer(recipient, amount);
+    function _transfer(uint amount) external {
+       require(_isUser(msg.sender), "Error: User not registered");
+       require(users[msg.sender].bal >= amount, "Error: Insufficient funds");
+        users[msg.sender].bal -= amount;
+        dai.transfer(msg.sender, amount);
     }    
 
     function _transferFrom(uint amount) external {
