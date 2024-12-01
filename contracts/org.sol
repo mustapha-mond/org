@@ -1,6 +1,8 @@
 pragma solidity ^0.6.12;
+// pragma solidity ^0.8.21;
 pragma experimental ABIEncoderV2;
- 
+
+import '../contracts/po.sol';
 import '../client/node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol';  
 
 interface intOrg {
@@ -18,6 +20,9 @@ interface intOrg {
     function getPayee(address _user,address _msgSender,address _extPartner) external view returns (address payable);
 
     function pay(address _user,address payable _extPartner,uint256 _poAmount) external returns (bool);
+
+    function setShip(address _user, address _partner, address _extPartner, uint256 _txn, bool _ship) external returns (bool);
+
 }
 
 contract org {
@@ -29,6 +34,13 @@ contract org {
     enum PTYPE {U, I, E, P} //Internal, External, User Partner
     enum STAGE {IN, TA, TS, TR, TP, PD} // Initial, To Approve, To Ship, To Receive, To Pay
     enum STATUS {IN, AP, RJ} // Approved, Rejected
+    enum TRACK {SU, AP, SH, RC, PD}
+
+    //Declare an Event
+    event Track(address indexed _user, address indexed _partner, uint indexed _txn, TRACK track, uint _date);
+
+//Emit an event
+    //emit Deposit(msg.sender, _id, msg.value);
   
     struct Transaction{
         address approver;
@@ -132,6 +144,8 @@ contract org {
     }
 
     mapping(address => contractPartner) contractPartners;
+
+    address addressPO;
     
     //Modifiers
     modifier onlyOwner() {
@@ -176,6 +190,10 @@ contract org {
     // }
     // return id;
     // }       
+    function setPOAddress(address _address) external returns (bool) {
+        addressPO = _address;
+        return true;
+    }
 
     function _isUser(address _user) public view returns (bool) {
         if (userIdx.length == 0) return false;
@@ -246,11 +264,11 @@ contract org {
         partners[msg.sender][_partner].ptype = PTYPE(3);
         partners[msg.sender][_partner].regCount += 1;
         if (_defShip) {users[msg.sender].defShip = _partner;}
-            users[msg.sender].partnerIdx.push(_partner);
-            uint256 idx = users[msg.sender].partnerIdx.length - 1;
-            users[msg.sender].partnerPointers[_partner] = idx;
-            partners[msg.sender][_partner].index = idx;
-            contractPartners[_partner].users.push(msg.sender);
+        users[msg.sender].partnerIdx.push(_partner);
+        uint256 idx = users[msg.sender].partnerIdx.length - 1;
+        users[msg.sender].partnerPointers[_partner] = idx;
+        partners[msg.sender][_partner].index = idx;
+        contractPartners[_partner].users.push(msg.sender);
         return true;
     }
 
@@ -274,7 +292,13 @@ contract org {
             partners[msg.sender][_partner].ptype
         );
     }
-
+function getPartnerName(address _user, address _partner) external view returns (string memory){
+        // require(_isUser(msg.sender), "Error: User not registered");
+        // require(_isRegistered(_partner, msg.sender),"Error: Partner not registered for this user");
+        return (
+            partners[_user][_partner].name
+        );
+    }
     function getAccountType(address _partner) public view returns (uint256) {
         uint256 atype = 0;
         if (_partner == owner) atype = 1;
@@ -451,15 +475,17 @@ contract org {
                 if (_partner != levelUp) {
                     txns[_user][_partner][_extPartner][_txn].stage = STAGE(1);
                     partners[_user][levelUp].txns.push(txns[_user][_partner][_extPartner][_txn].index);
+                    emit Track(_user, _partner, _txn, TRACK(0), now);
                 }  else {
                         if (_isUser(_extPartner) && users[_extPartner].defShip != address(0)) {
                             uint idx = txns[_user][_partner][_extPartner][_txn].index;
                             users[_extPartner].txns.push(idx);
                             partners[_extPartner][users[_extPartner].defShip].txns.push(idx);
-                             txns[_user][_partner][_extPartner][_txn].shipper = users[_extPartner].defShip;
+                            txns[_user][_partner][_extPartner][_txn].shipper = users[_extPartner].defShip;
                         }
                         txns[_user][_partner][_extPartner][_txn].stage = STAGE(2);
                         txns[_user][_partner][_extPartner][_txn].status = STATUS(1);
+                        emit Track(_user, _partner, _txn, TRACK(1), now);
                 }  
                 return levelUp;
             }
@@ -485,6 +511,7 @@ contract org {
             }
             txns[_user][_partner][_extPartner][_txn].status = STATUS(1);
             txns[_user][_partner][_extPartner][_txn].stage = STAGE(2);
+            emit Track(_user, _partner, _txn, TRACK(1), now);
         }
         else {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(0);
@@ -493,15 +520,20 @@ contract org {
         return true;
     }
             
-    function setShip(address _user, address _partner, address _extPartner, uint256 _txn, bool _ship) external returns (bool) {
+    function setShip(address _user, address _partner, address _extPartner, uint256 _txn, bool _ship) public returns (bool) {
         require(_isUser(_extPartner), "Error: User not registered");
-        require(_isRegistered(msg.sender, _extPartner), "Error: Partner not registered for this user");
+        // require(_isRegistered(msg.sender, _extPartner), "Error: Partner not registered for this user");
         // require(_isTxn(_user, _partner, _extPartner, _txn), "Error: Transaction does not exist");
-        require(txns[_user][_partner][_extPartner][_txn].stage == STAGE(2),"Error: Not ready to ship");
+        //require(txns[_user][_partner][_extPartner][_txn].stage == STAGE(2),"Error: Not ready to ship");
+        // intPO po = intPO(addressPO);
+
         if (_ship) {
              // Delete from Shipper here
             txns[_user][_partner][_extPartner][_txn].status = STATUS(1);
             txns[_user][_partner][_extPartner][_txn].stage = STAGE(3);
+            // po.sendTrace(_user, _partner, _extPartner, txns[_user][_partner][_extPartner][_txn].shipper, _txn,0);
+            emit Track(_user, _partner, _txn, TRACK(2), now);
+
         }
         else {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(2);
@@ -514,9 +546,12 @@ contract org {
         require(_isRegistered(msg.sender, _user), "Error: Partner not registered for this user");
         // require(_isTxn(_user, _partner, _extPartner, _txn), "Error: Transaction does not exist");
         require(txns[_user][_partner][_extPartner][_txn].stage == STAGE(3),"Error: Not ready to receive");
+        intPO po = intPO(addressPO);
         if (_receive) {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(1);
             txns[_user][_partner][_extPartner][_txn].stage = STAGE(4);
+            po.sendTrace(_user, _partner, _extPartner, txns[_user][_partner][_extPartner][_txn].shipper, _txn, 1);
+            emit Track(_user, _partner, _txn, TRACK(3), now);
         }
         else {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(2);
@@ -536,6 +571,7 @@ contract org {
             } else _extPartner.transfer(txns[_user][_partner][_extPartner][_txn].amount);
             txns[_user][_partner][_extPartner][_txn].status = STATUS(1);
             txns[_user][_partner][_extPartner][_txn].stage = STAGE(5);
+            emit Track(_user, _partner, _txn, TRACK(4), now);
         }
         else {
             txns[_user][_partner][_extPartner][_txn].status = STATUS(2);

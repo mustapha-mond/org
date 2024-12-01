@@ -1,7 +1,16 @@
 pragma solidity ^0.6.12;
+pragma experimental ABIEncoderV2;
+// pragma solidity ^0.8.21;
 
 import '../contracts/org.sol';
 import '../client/airnode-master/packages/protocol/contracts/AirnodeClient.sol';
+
+interface intPO {
+
+    function sendTrace(address _user, address _partner, address _extPartner, address _shipper, uint256 _txn, uint8 _event) external returns (bool);
+
+}
+
 
 contract po is AirnodeClient{
 
@@ -9,6 +18,7 @@ contract po is AirnodeClient{
         mapping(uint => uint) headerPointers;
         uint[] headerIdx;
     }
+
  //User, Partner, External Partner
     mapping (address => mapping(address => mapping(address => Order))) orders;  
    
@@ -26,7 +36,7 @@ contract po is AirnodeClient{
     }
 //User, Partner, External Partner, PO Number  
     mapping (address => mapping(address => mapping(address => mapping(uint => Header)))) headers;  
-   
+
     struct Item {
         bytes32 sku;
         uint quantity;
@@ -34,13 +44,24 @@ contract po is AirnodeClient{
         uint price;
         uint index;
         uint poNumber;
-        address manufacturer;
-        uint wac;
+        bytes32 batch;
         bytes32 requestId;
+        uint mainItem;
+        mapping (bytes32 => uint) batchPointers;
+        bytes32[] batchIndex;
+    }
+
+    struct batchLoad{
+        uint item;
+        bytes32 batch;
+        uint index;
     }
 
 //User, Partner, External Partner, Order, Item    
     mapping (address => mapping(address => mapping(address => mapping(uint => mapping(uint => Item))))) items;
+
+    // mapping (address => mapping(address => mapping(address => mapping(uint => mapping(uint => mapping(uint => batchLoad)))))) batches;
+
 
     address addressOrg;
 
@@ -61,7 +82,16 @@ contract po is AirnodeClient{
         bytes
     );
 
+    enum TRACE {SH, RC}
+
+    //Declare an Event
+    event Trace(bytes32 indexed _batch, address indexed _user, address indexed _Partner, address _extPartner, address _shipper, uint _txn, uint _itemNo, TRACE trace, uint _date);
+
+    event whereUsed(bytes32 indexed _inputBatch, bytes32 indexed _batch, address indexed _user, address _partner, address _shipper, uint _txn, uint _itemNo, uint _date);
+
     event call_test(address user, address sender, address extPartner, uint total);
+
+    event debug(uint indexed step);
 
     constructor (address airnodeAddress)
         public
@@ -122,7 +152,7 @@ contract po is AirnodeClient{
         uint idx = orders[_user][msg.sender][_extPartner].headerIdx.length - 1;
         orders[_user][msg.sender][_extPartner].headerPointers[_poNumber] = idx;
         headers[_user][msg.sender][_extPartner][_poNumber].index = idx;
-        org.updateTxnList (_user, msg.sender, _extPartner, _poNumber, 0, 0);
+        org.updateTxnList (_user, msg.sender, _extPartner, _poNumber, 0,0);
         return true;
     }
    
@@ -137,7 +167,7 @@ contract po is AirnodeClient{
         return true;
     }
    
-    function createItem (address _user, address _extPartner, uint _poNumber, uint _itemNo, bytes32 _sku, uint _quantity, uint _price, bytes calldata _params) external returns (bool) {
+    function createItem (address _user, address _extPartner, uint _poNumber, uint _itemNo, bytes32 _sku, uint _quantity, uint _price, bytes32 _batch) external returns (bool) {
         intOrg org = intOrg(addressOrg);
         require (org._isUser(_user),'Error: User not registered');
         require (org._isPartExtReg(_user, msg.sender),'Error: Partner not registered for this user');
@@ -148,6 +178,7 @@ contract po is AirnodeClient{
         items[_user][msg.sender][_extPartner][_poNumber][_itemNo].sku = _sku;
         items[_user][msg.sender][_extPartner][_poNumber][_itemNo].quantity = _quantity;
         items[_user][msg.sender][_extPartner][_poNumber][_itemNo].price = _price;
+        items[_user][msg.sender][_extPartner][_poNumber][_itemNo].batch = _batch;
         headers[_user][msg.sender][_extPartner][_poNumber].total += _quantity * _price;
         headers[_user][msg.sender][_extPartner][_poNumber].itemIdx.push(_itemNo);
         uint idx = headers[_user][msg.sender][_extPartner][_poNumber].itemIdx.length - 1;
@@ -155,10 +186,11 @@ contract po is AirnodeClient{
         headers[_user][msg.sender][_extPartner][_poNumber].itemPointers[_itemNo] = idx;
         uint total =  headers[_user][msg.sender][_extPartner][_poNumber].total;
         org.updateTxnList (_user, msg.sender, _extPartner, _poNumber, total, 1);
-        if (_price == 0){
-            items[_user][msg.sender][_extPartner][_poNumber][_itemNo].requestId = makeRequest(AirnodePr, AirnodeEP, AirnodeRqInd, AirnodeWal, _params);
-            emit Airnode (AirnodePr, AirnodeEP, AirnodeRqInd, AirnodeWal, _params);
-        }
+        //Add this back later, when figure out how to add objects to calldata
+        // if (_price == 0){
+        //     items[_user][msg.sender][_extPartner][_poNumber][_itemNo].requestId = makeRequest(AirnodePr, AirnodeEP, AirnodeRqInd, AirnodeWal, _params);
+        //     emit Airnode (AirnodePr, AirnodeEP, AirnodeRqInd, AirnodeWal, _params);
+        // }
         return (true);
     }
 
@@ -213,10 +245,107 @@ contract po is AirnodeClient{
         }
         return (items[_user][msg.sender][_extPartner][_poNumber][_itemNo].sku,
                 items[_user][msg.sender][_extPartner][_poNumber][_itemNo].quantity,
-                items[_user][msg.sender][_extPartner][_poNumber][_itemNo].price, pending, reprice);
+                items[_user][msg.sender][_extPartner][_poNumber][_itemNo].price, pending, reprice
+                );
     }
 
-   function reprice (address _user, address _extPartner, uint _poNumber, uint _itemNo) external returns (bytes32, uint, uint, bool) {
+
+    function getItemBatches (address _user, address _extPartner, uint _poNumber, uint _itemNo) external view returns (bytes32[] memory) {
+        intOrg org = intOrg(addressOrg);
+        require (org._isUser(_user),'Error: User not registered');
+        require (org._isPartExtReg(_user, msg.sender),'Error: Partner not registered for this user');
+        require (org._isExtPartReg(_user, _extPartner, msg.sender),'Error: External partner not registered');
+        require (isOrder(_user, _extPartner, _poNumber),'Error: Order does not exist');
+        require (isItem(_user, _extPartner, _poNumber, _itemNo), 'Error: Item does not exist');
+        return (items[_user][msg.sender][_extPartner][_poNumber][_itemNo].batchIndex);
+    }
+
+    function getBatch (address _user,  address _partner, address _extPartner, uint _poNumber, uint _itemNo) external view returns (bytes32) {
+        intOrg org = intOrg(addressOrg);
+        require (org._isUser(_user),'Error: User not registered');
+        require (org._isPartExtReg(_user, msg.sender),'Error: Partner not registered for this user');
+        require (org._isExtPartReg(_user, _extPartner, msg.sender),'Error: External partner not registered');
+        require (isOrder(_user, _extPartner, _poNumber),'Error: Order does not exist');
+        require (isItem(_user, _extPartner, _poNumber, _itemNo), 'Error: Item does not exist');
+        return (items[_user][_partner][_extPartner][_poNumber][_itemNo].batch);
+    }
+
+    function stageShip(address _user, address _partner, address _extPartner, uint _txn, batchLoad[] calldata _batchLoad) external returns(bool) {
+
+        intOrg org = intOrg(addressOrg);
+        // require (org._isUser(_user),'Error: User not registered');
+        // require (org._isPartExtReg(_user, msg.sender),'Error: Partner not registered for this user');
+        // require (org._isExtPartReg(_user, _extPartner, msg.sender),'Error: External partner not registered');
+        // require (isOrder(_user, _extPartner, _txn),'Error: Order does not exist');
+
+        bool newItem;
+        uint lastItem;
+        uint itemNo;
+        bytes32 batch;
+
+        for (uint i=0; i < _batchLoad.length; i++){
+            
+            if (_batchLoad[i].item != lastItem) {
+            
+                newItem = true;
+                lastItem = _batchLoad[i].item;
+            }
+            if (newItem) {
+                  
+                //   items[_user][_partner][_extPartner][_txn][_batchLoad[i].item].batchIndex.push(_batchLoad[i].batch);
+                  items[_user][_partner][_extPartner][_txn][_batchLoad[i].item].batch = _batchLoad[i].batch;
+ 
+                  newItem = false;
+                  lastItem = _batchLoad[i].item;
+            }
+            else {
+                //   items[_user][msg.sender][_extPartner][_txn][_batchLoad[i].item].batchIndex.push(_batchLoad[i].batch);
+                //   uint idx = items[_user][msg.sender][_extPartner][_txn][_batchLoad[i].item].batchIndex.length -1;
+                //   items[_user][msg.sender][_extPartner][_txn][_batchLoad[i].item].batchPointers[_batchLoad[i].batch] = idx;
+                //   batches[_user][msg.sender][_extPartner][_txn][_batchLoad[i].item][_batchLoad[i].batch].index = idx;event whereUsed(bytes32 indexed _inputBatch, bytes32 indexed _batch, address indexed _Partner, address _user, address _extPartner, address _shipper, uint _txn, uint _itemNo, TRACE trace, uint _date);
+
+                items[_user][_partner][_extPartner][_txn][_batchLoad[i].item].batchIndex.push(_batchLoad[i].batch);
+
+                emit  whereUsed(_batchLoad[i].batch, items[_user][_partner][_extPartner][_txn][_batchLoad[i].item].batch, _user, msg.sender, _extPartner, _txn, lastItem, now);
+                                
+            }
+        }
+        
+        for (uint i=0; i < headers[_user][_partner][_extPartner][_txn].itemIdx.length; i++){
+                itemNo = headers[_user][_partner][_extPartner][_txn].itemIdx[i];
+                // shipper = headers[_user][_partner][_extPartner][_txn].
+                batch = items[_user][_partner][_extPartner][_txn][itemNo].batch;
+                emit Trace(batch, _user, _partner, _extPartner, msg.sender, _txn, itemNo, TRACE(0) ,now);
+        }
+    
+        org.setShip(_user, _partner, _extPartner, _txn, true);
+
+        return true;
+    }
+
+    function sendTrace(address _user, address _partner, address _extPartner, address _shipper, uint _txn, uint8 _event) external returns(bool) {
+
+        bytes32 batch ;
+        uint itemNo;
+
+       if (_event == 0) { 
+    
+            for (uint i=0; i < headers[_user][_partner][_extPartner][_txn].itemIdx.length; i++){
+                itemNo = headers[_user][_partner][_extPartner][_txn].itemIdx[i];
+                batch = items[_user][_partner][_extPartner][_txn][itemNo].batch;
+                emit Trace(batch, _user, _partner, _extPartner, _shipper, _txn, itemNo, TRACE(0) ,now);
+             }
+       }
+        else {
+            for (uint i=0; i < headers[_user][_partner][_extPartner][_txn].itemIdx.length; i++){
+                itemNo = headers[_user][_partner][_extPartner][_txn].itemIdx[i];
+                batch = items[_user][_partner][_extPartner][_txn][itemNo].batch;
+                emit Trace(batch, _user, _partner, _extPartner, _shipper, _txn, itemNo, TRACE(1) ,now);
+             } 
+        }
+    }
+
+    function reprice (address _user, address _extPartner, uint _poNumber, uint _itemNo) external returns (bytes32, uint, uint, bool) {
         intOrg org = intOrg(addressOrg);
         require (org._isUser(_user),'Error: User not registered');
         require (org._isPartExtReg(_user, msg.sender),'Error: Partner not registered for this user');
