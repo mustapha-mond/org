@@ -13,13 +13,9 @@
 
 ## _Docs_
 
-Overview:
+Track & Trace Demo:
 
-https://docs.google.com/presentation/d/1nzTLvVUPsVcIxiqXMcJCXswuxxtxfN_-NpqvYMmYQk0/edit?usp=sharing
-
-Litepaper:
-
-https://docs.google.com/document/d/1tEY9Do_NjU-5O04cAeI3VIbLQar3l596G07GFfD26rI/edit?usp=sharing
+https://drive.google.com/file/d/1NSN9KYjh9zBcGrkNtohnDQJN-Id5nZXm/view?usp=drive_link
 
 B2C Demo:
 
@@ -30,6 +26,15 @@ Note: e-commerce website cloned from Scrimba React course with some mods.
 B2B Demo:
 
 https://drive.google.com/file/d/1lIEju9dEEkXIv6iJL1ubFjNov2BE5oxN/view?usp=sharing
+
+Overview:
+
+https://docs.google.com/presentation/d/1nzTLvVUPsVcIxiqXMcJCXswuxxtxfN_-NpqvYMmYQk0/edit?usp=sharing
+
+Litepaper:
+
+https://docs.google.com/document/d/1tEY9Do_NjU-5O04cAeI3VIbLQar3l596G07GFfD26rI/edit?usp=sharing
+
 
 
 ## _Goals_
